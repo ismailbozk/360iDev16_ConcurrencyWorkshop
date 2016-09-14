@@ -56,7 +56,7 @@ class ThreadSafePerson: Person {
   }
   
   override var name: String {
-    return isolationQueue.sync {
+    return isolationQueue.sync {//sync b/c it shoudl return immediately.
       return super.name
     }
   }

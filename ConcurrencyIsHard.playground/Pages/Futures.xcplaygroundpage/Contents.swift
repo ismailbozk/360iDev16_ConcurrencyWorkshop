@@ -1,5 +1,5 @@
 //: [⬅ Dispatch Barriers](@previous)
-
+//check out: Promise kit, reactive programming
 /*:
  ## Futures
  

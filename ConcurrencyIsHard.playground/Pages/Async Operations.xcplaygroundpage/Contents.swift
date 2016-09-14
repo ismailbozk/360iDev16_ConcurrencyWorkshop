@@ -18,6 +18,8 @@
  - important:
  Step 3 of these instructions is *extremely* important - it's how the queue responsible for running the operation can tell that it has completed. Otherwise it'll sit uncompleted for eternity.
  */
+//MARK: There are some recommendations on the stackoverflow, like using NSRunLoop or other methods to keep the operation running while async operation is running. But I guess this is the best option
+
 import UIKit
 
 
@@ -27,24 +29,24 @@ import UIKit
 class AsyncOperation: Operation {
   enum State: String {
     case Ready, Executing, Finished
-    
-    fileprivate var keyPath: String {
-      return "is" + rawValue
+
+    fileprivate/*??*/ var keyPath: String {// fileprivate less restrictive. it can be accesible only from the same file.
+        return "is" + rawValue  //Kinda dangerous?
     }
   }
-  
   var state = State.Ready {
     willSet {
-      willChangeValue(forKey: newValue.keyPath)
-      willChangeValue(forKey: state.keyPath)
+      willChangeValue(forKey: newValue.keyPath)//?? // isFinished will be true
+      willChangeValue(forKey: state.keyPath)// isExecuting will be false
     }
     didSet {
-      didChangeValue(forKey: oldValue.keyPath)
-      didChangeValue(forKey: state.keyPath)
+      didChangeValue(forKey: oldValue.keyPath)//?? // isFinished did become true
+      didChangeValue(forKey: state.keyPath)// isExecuting did become false
     }
   }
 }
 
+//AccessControls: private > fileprivate > internal(default) > public
 /*:
  Each of the state properties inherited from `Operation` are then overridden to defer to the new `state` property.
  
@@ -54,8 +56,9 @@ class AsyncOperation: Operation {
  */
 extension AsyncOperation {
   // NSOperation Overrides
+    // why do we have 3 different property for one flag (I mean status)? Strange
   override var isReady: Bool {
-    return super.isReady && state == .Ready
+    return super.isReady && state == .Ready //don't remember why?
   }
   
   override var isExecuting: Bool {
@@ -66,6 +69,7 @@ extension AsyncOperation {
     return state == .Finished
   }
   
+    //MARK: Check out isAsynchronous fucn doc
   override var isAsynchronous: Bool {
     return true
   }
@@ -96,6 +100,7 @@ class ImageLoadOperation: AsyncOperation {
   override func main() {
     duration {
       simulateAsyncNetworkLoadImage(named: self.inputName) {
+        //check out @escaping flag for closures
         [unowned self] (image) in
         self.outputImage = image
         self.state = .Finished

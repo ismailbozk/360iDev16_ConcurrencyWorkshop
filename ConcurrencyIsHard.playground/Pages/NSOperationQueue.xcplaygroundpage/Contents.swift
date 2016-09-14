@@ -8,7 +8,7 @@
  Enter `OperationQueue`, which manages the execution of one or more `Operation` objects. Rather than having to handle threads directly, you instead pass your operations to a queue to be executed at the system's discretion. A queue can be configured to allow concurrent execution of the operations in the queue.
  
  */
-
+// FIFO
 import UIKit
 
 
@@ -16,7 +16,7 @@ import UIKit
 let imageNames = ["dark_road_small", "train_day", "train_dusk", "train_night"]
 
 let images = imageNames.flatMap { UIImage(named: "\($0).jpg") }
-images
+images//map vs. flatMap = flatmap ignores the nils
 
 
 class TiltShiftOperation: Operation {
@@ -44,16 +44,27 @@ var operations = [TiltShiftOperation]()
  You can see that here, with the result of the `duration` function:
  
  */
+queue.maxConcurrentOperationCount = 1
+
+
+images
+
 duration {
   for image in images {
     let op = TiltShiftOperation()
     op.inputImage = image
     operations += [op]
     
-    queue.addOperation(op)
+    queue.addOperation(op)  //they start running immediately after adding them
   }
 }
 
+// check out below
+//queue.cancelAllOperations()
+//queue.operations.first?.cancel()
+
+
+// No pause fucntinality in OperationQueue s
 
 /*:
  * experiment:
@@ -62,7 +73,6 @@ duration {
  \
  Try changing the value of this property below to see how it affects the time it takes for the queue to finish processing all operations
  */
-queue.maxConcurrentOperationCount = 2
 
 duration {
   queue.waitUntilAllOperationsAreFinished()
@@ -71,7 +81,7 @@ duration {
 
 
 //: Check that all operations have filtered the image as expected
-let output = operations.flatMap { $0.outputImage }
-output
+let outputs = operations.flatMap { $0.outputImage }
+outputs
 
 //: [➡ NSOperation Async](@next)

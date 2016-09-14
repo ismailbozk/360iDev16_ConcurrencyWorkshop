@@ -23,6 +23,10 @@
  
  `Operation` is a high-level abstraction that represents _"a unit of work"_. You can use this to wrap some sort of functionality, and then pass this off to be executed concurrently.
  */
+//Built on to of GCD
+//Compared to GCD
+//Cancelable
+//Has felixibility to manage: Chainable, maxNumber of concurreny operations
 
 import UIKit
 
@@ -37,14 +41,13 @@ duration {
 var outputImage: UIImage?
 
 //: You can use the `BlockOperation` subclass of `Operation` to easily wrap some functionality.
-
-let myFirstOperation = BlockOperation {
+let myFirstOperation = BlockOperation { //check InvocationOperation
   outputImage = tiltShift(image: image)
 }
-
-
 //: You can then execute this operation with the `start()` method:
-myFirstOperation.start()
+duration {
+    myFirstOperation.start()
+}
 
 
 
@@ -56,6 +59,8 @@ outputImage
  
  When subclassing, create properties for input and output objects, and then override the `main()` method to perform the work.
  */
+// Custom Operations
+
 class TiltShiftOperation: Operation {
   var inputImage: UIImage?
   var outputImage: UIImage?

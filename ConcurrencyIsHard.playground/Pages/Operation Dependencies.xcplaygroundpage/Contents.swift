@@ -52,7 +52,7 @@ class TiltShiftOperation: Operation {
       .first as? FilterDataProvider,
       inputImage == .none {
       inputImage = dependencyImageProvider.outputImage
-    }
+    }//What if there is no FilterDataProvider in the dependecies??
     outputImage = tiltShift(image: inputImage)
   }
 }
@@ -74,12 +74,28 @@ extension ImageLoadOperation: FilterDataProvider {
  - important:
  Heed all the usual warnings about custom operators. This is a situation where they can offer genuine clarity, but that isn't often the case.
  */
-precedencegroup Chainable {
-  associativity: left
+precedencegroup HighChainable {
+    associativity: left
+    higherThan: Chainable
 }
+
+precedencegroup/*??*/ Chainable {
+    associativity:/*??*/ left
+    higherThan: LowChainable
+}
+
+precedencegroup LowChainable {
+    associativity: left
+    //Error: Precedence group cannot be given lower precedence than group in same module;
+    //make the other precedence group higher than this one instead
+    //but WHY???
+//    lowerThan: Chainable
+}
+//a+b, b++, ++b
 infix operator |> : Chainable
+//Check out postfix and prefix as well
 extension Operation {
-  static func |>(lhs: Operation, rhs: Operation) -> Operation {
+  static func |>(lhs: Operation, rhs: Operation) -> Operation {//why static?
     rhs.addDependency(lhs)
     return rhs
   }
@@ -101,7 +117,7 @@ imageLoad |> filter
 //: Add both operations to the operation queue
 let queue = OperationQueue()
 duration {
-  queue.addOperations([imageLoad, filter], waitUntilFinished: true)
+  queue.addOperations([filter, imageLoad], waitUntilFinished: true)
 }
 
 
